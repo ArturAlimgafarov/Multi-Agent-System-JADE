@@ -8,6 +8,8 @@ public class OrderAgent extends Agent {
     @Override
     protected void setup() {
         registerService();
+
+        System.out.println("OrderAgent created");
     }
 
     public void registerService() {

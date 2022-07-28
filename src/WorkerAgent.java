@@ -8,6 +8,8 @@ public class WorkerAgent extends Agent {
     @Override
     protected void setup() {
         registerService();
+
+        System.out.println("WorkerAgent created");
     }
 
     public void registerService() {
