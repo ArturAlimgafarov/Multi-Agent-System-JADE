@@ -5,6 +5,9 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 
 public class OrderAgent extends Agent {
+    public String _name;
+    public double _complexity;
+
     @Override
     protected void setup() {
         registerService();
