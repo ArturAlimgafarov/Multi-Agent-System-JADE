@@ -10,6 +10,11 @@ public class WorkerAgent extends Agent {
 
     @Override
     protected void setup() {
+        Object[] args = getArguments();
+
+        System.out.println((String) args[0]);
+        System.out.println((double) args[1]);
+
         registerService();
 
         System.out.println("WorkerAgent created");

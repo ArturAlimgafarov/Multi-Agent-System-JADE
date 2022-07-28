@@ -1,0 +1,11 @@
+{
+  "order": {
+    "name": "Order №00023052",
+    "complexity": 100.0
+  },
+
+  "worker": {
+    "name": "P. Parker",
+    "productivity": 34.0
+  }
+}

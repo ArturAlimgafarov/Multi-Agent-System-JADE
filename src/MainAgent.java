@@ -5,25 +5,51 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainAgent extends Agent {
     @Override
     protected void setup() {
         registerService();
-
         System.out.println("MainAgent created");
 
-        Object[] workerModel = {}; // params args
-        createAgent(workerModel,
-                "Worker #1",
-                "WorkerAgent"
-        );
+        // parse agent's data and creating
+        var inputFile = (String) getArguments()[0];
+        var parser = new JSONParser();
+        try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), StandardCharsets.UTF_8))) {
+            var jsonInput = (JSONObject) parser.parse(reader);
+            var order = (JSONObject) jsonInput.get("order");
+            String name = (String) order.get("name");
+            double complexity = (double) order.get("complexity");
 
-        Object[] orderModel = {}; // params args
-        createAgent(orderModel,
-                "Order #1",
-                "OrderAgent"
-        );
+            Object[] orderModel = {name, complexity}; // params args
+            createAgent(orderModel,
+                    name,
+                    "OrderAgent"
+            );
+
+            var worker = (JSONObject) jsonInput.get("worker");
+            name = (String) worker.get("name");
+            double productivity = (double) worker.get("productivity");
+
+            Object[] workerModel = { name, productivity }; // params args
+            createAgent(workerModel,
+                    name,
+                    "WorkerAgent"
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     public void registerService() {
