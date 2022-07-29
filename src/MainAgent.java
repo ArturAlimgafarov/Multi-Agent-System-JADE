@@ -86,7 +86,6 @@ public class MainAgent extends Agent {
         try {
             ac = getContainerController().createNewAgent(name, agentName, agentModel);
         } catch (StaleProxyException e) {
-            System.out.println("Error #1");
             e.printStackTrace();
         }
 
@@ -94,7 +93,6 @@ public class MainAgent extends Agent {
             try {
                 ac.start();
             } catch (StaleProxyException e) {
-                System.out.println("Error #2");
                 e.printStackTrace();
             }
         }

@@ -1,8 +1,11 @@
 import jade.core.Agent;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
+import org.json.simple.JSONObject;
 
 public class OrderAgent extends Agent {
     public String _name;
@@ -12,12 +15,14 @@ public class OrderAgent extends Agent {
     protected void setup() {
         Object[] args = getArguments();
 
-        this._name = (String) args[0];
-        this._complexity = (double) args[1];
+        _name = (String) args[0];
+        _complexity = (double) args[1];
 
         registerService();
 
-        System.out.println("OrderAgent " + this._name + " created");
+        System.out.println("OrderAgent " + _name + " created");
+
+        addBehaviour(new SearchWorker());
     }
 
     public void registerService() {
@@ -38,6 +43,39 @@ public class OrderAgent extends Agent {
             Thread.sleep(10);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    public class SearchWorker extends OneShotBehaviour {
+        @Override
+        public void action() {
+            ACLMessage messageToWorkers = new ACLMessage(ACLMessage.REQUEST);
+            DFAgentDescription tmpWorkers = new DFAgentDescription();
+            ServiceDescription sdWorkers = new ServiceDescription();
+            sdWorkers.setType("WorkerAgent");
+            tmpWorkers.addServices(sdWorkers);
+
+            try {
+                DFAgentDescription[] res = null;
+
+                while (res == null || res != null && res.length < 1) {
+                    res = DFService.search(myAgent, tmpWorkers);
+                }
+
+                JSONObject jsonToWorker = new JSONObject();
+                jsonToWorker.put("name", _name);
+                jsonToWorker.put("complexity", _complexity);
+
+                messageToWorkers.setContent(jsonToWorker.toJSONString());
+
+                for (var worker: res) {
+                    messageToWorkers.addReceiver(worker.getName());
+                }
+
+                myAgent.send(messageToWorkers);
+            } catch (FIPAException e) {
+                e.printStackTrace();
+            }
         }
     }
 

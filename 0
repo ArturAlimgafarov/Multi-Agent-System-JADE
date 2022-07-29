@@ -1,8 +1,0 @@
-[33mcdd2a92[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m Running bat file with reading input data for agents and receiving args
-[33mb7d6446[m Added Order/Worker agent's properties
-[33m290b715[m First tes running each agents
-[33mfd6f1ce[m Creating Order and Worker agents
-[33mcf255e6[m Creating first agent
-[33m92fc13f[m Added run config and first starting jade GUI
-[33me1933cc[m Added jar libraries
-[33me37e790[m Create project
