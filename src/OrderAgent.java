@@ -9,20 +9,19 @@ import jade.lang.acl.ACLMessage;
 import org.json.simple.JSONObject;
 
 public class OrderAgent extends Agent {
-    public String _name;
-    public int _operationID;
-    public double _complexity;
+    public long _operationID;
+    public long _complexity;
 
     @Override
     protected void setup() {
         Object[] args = getArguments();
 
-        _name = (String) args[0];
-        _complexity = (double) args[1];
+        _operationID = (long) args[0];
+        _complexity = (long) args[1];
 
         registerService();
 
-        System.out.println("OrderAgent " + _name + " created");
+        System.out.println(getLocalName() + " created.");
 
         addBehaviour(new StartSearchingWorker());
     }
@@ -72,7 +71,7 @@ public class OrderAgent extends Agent {
                 }
 
                 JSONObject jsonToWorker = new JSONObject();
-                jsonToWorker.put("name", _name);
+                jsonToWorker.put("operationID", _operationID);
                 jsonToWorker.put("complexity", _complexity);
 
                 messageToWorkers.setContent(jsonToWorker.toJSONString());

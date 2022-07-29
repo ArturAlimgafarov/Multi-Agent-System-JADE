@@ -11,20 +11,19 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class WorkerAgent extends Agent {
-    public String _name;
-    public int _operationID;
-    public double _productivity;
+    public long _operationID;
+    public long _productivity;
 
     @Override
     protected void setup() {
         Object[] args = getArguments();
 
-        _name = (String) args[0];
-        _productivity = (double) args[1];
+        _operationID = (long) args[0];
+        _productivity = (long) args[1];
 
         registerService();
 
-        System.out.println("WorkerAgent " + _name + " created");
+        System.out.println(getLocalName() + " is ready.");
 
         addBehaviour(new TakingOrders());
     }
@@ -65,10 +64,10 @@ public class WorkerAgent extends Agent {
                         e.printStackTrace();
                     }
 
-                    String orderName = (String) jsonObject.get("name");
-                    double orderComplexity = (double) jsonObject.get("complexity");
+                    long orderOperationID = (long) jsonObject.get("operationID");
+                    long orderComplexity = (long) jsonObject.get("complexity");
 
-                    System.out.println(_name + " receive " + orderName + " (" + orderComplexity + ")");
+                    System.out.println(getLocalName() + " receive " + msg.getSender().getLocalName() + " (" + orderOperationID + "; " + orderComplexity + ")");
                 }
             }
         }

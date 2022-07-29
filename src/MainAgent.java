@@ -19,7 +19,8 @@ public class MainAgent extends Agent {
     @Override
     protected void setup() {
         registerService();
-        System.out.println("MainAgent created");
+
+        System.out.println(getLocalName() + " launched.");
 
         // parse agent's data and creating
         var inputFile = (String) getArguments()[0];
@@ -27,28 +28,33 @@ public class MainAgent extends Agent {
         try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), StandardCharsets.UTF_8))) {
             var jsonInput = (JSONObject) parser.parse(reader);
 
+            int i = 1;
             var orders = (JSONArray) jsonInput.get("orders");
             for (Object o: orders) {
                 var order = (JSONObject) o;
-                String name = (String) order.get("name");
-                double complexity = (double) order.get("complexity");
+                String orderName = "`Order №" + i + "`";
+                long orderOperationID = (long) order.get("operationID");
+                long complexity = (long) order.get("complexity");
 
-                Object[] orderModel = {name, complexity}; // params args
+                Object[] orderModel = {orderOperationID, complexity}; // params args
                 createAgent(orderModel,
-                        name,
+                        orderName,
                         "OrderAgent"
                 );
+
+                i++;
             }
 
             var workers = (JSONArray) jsonInput.get("workers");
             for (Object w: workers) {
                 var worker = (JSONObject) w;
-                String name = (String) worker.get("name");
-                double complexity = (double) worker.get("productivity");
+                String workerName = "`" + worker.get("name") + "`";
+                long workerOperationID = (long) worker.get("operationID");
+                long productivity = (long) worker.get("productivity");
 
-                Object[] orderModel = {name, complexity}; // params args
-                createAgent(orderModel,
-                        name,
+                Object[] workerModel = {workerOperationID, productivity}; // params args
+                createAgent(workerModel,
+                        workerName,
                         "WorkerAgent"
                 );
             }
