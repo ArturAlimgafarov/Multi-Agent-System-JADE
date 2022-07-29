@@ -12,20 +12,21 @@ import org.json.simple.parser.ParseException;
 
 public class WorkerAgent extends Agent {
     public String _name;
+    public int _operationID;
     public double _productivity;
 
     @Override
     protected void setup() {
         Object[] args = getArguments();
 
-        this._name = (String) args[0];
-        this._productivity = (double) args[1];
+        _name = (String) args[0];
+        _productivity = (double) args[1];
 
         registerService();
 
-        System.out.println("WorkerAgent " + this._name + " created");
+        System.out.println("WorkerAgent " + _name + " created");
 
-        addBehaviour(new ReceiveOrder());
+        addBehaviour(new TakingOrders());
     }
 
     public void registerService() {
@@ -49,7 +50,7 @@ public class WorkerAgent extends Agent {
         }
     }
 
-    public class ReceiveOrder extends CyclicBehaviour {
+    public class TakingOrders extends CyclicBehaviour {
         @Override
         public void action() {
             ACLMessage msg = myAgent.receive();

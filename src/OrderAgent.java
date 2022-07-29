@@ -1,4 +1,5 @@
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -9,6 +10,7 @@ import org.json.simple.JSONObject;
 
 public class OrderAgent extends Agent {
     public String _name;
+    public int _operationID;
     public double _complexity;
 
     @Override
@@ -22,7 +24,7 @@ public class OrderAgent extends Agent {
 
         System.out.println("OrderAgent " + _name + " created");
 
-        addBehaviour(new SearchWorker());
+        addBehaviour(new StartSearchingWorker());
     }
 
     public void registerService() {
@@ -46,7 +48,14 @@ public class OrderAgent extends Agent {
         }
     }
 
-    public class SearchWorker extends OneShotBehaviour {
+    public class WaitingFreeWorker extends CyclicBehaviour {
+        @Override
+        public void action() {
+
+        }
+    }
+
+    public class StartSearchingWorker extends OneShotBehaviour {
         @Override
         public void action() {
             ACLMessage messageToWorkers = new ACLMessage(ACLMessage.REQUEST);
