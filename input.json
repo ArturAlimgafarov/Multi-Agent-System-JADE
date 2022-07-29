@@ -1,11 +1,31 @@
 {
-  "order": {
-    "name": "Order №00023052",
-    "complexity": 100.0
-  },
+  "orders": [
+    {
+      "name": "Order №00023052",
+      "complexity": 104.44
+    },
+    {
+      "name": "Order №00137263",
+      "complexity": 97.65
+    },
+    {
+      "name": "Order №00823721",
+      "complexity": 49.31
+    },
+    {
+      "name": "Order №09203723",
+      "complexity": 127.18
+    }
+  ],
 
-  "worker": {
-    "name": "P. Parker",
-    "productivity": 34.0
-  }
+  "workers": [
+    {
+      "name": "P. Parker",
+      "productivity": 34.12
+    },
+    {
+      "name": "M. Morales",
+      "productivity": 17.37
+    }
+  ]
 }

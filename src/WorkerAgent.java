@@ -12,12 +12,12 @@ public class WorkerAgent extends Agent {
     protected void setup() {
         Object[] args = getArguments();
 
-        System.out.println((String) args[0]);
-        System.out.println((double) args[1]);
+        this._name = (String) args[0];
+        this._productivity = (double) args[1];
 
         registerService();
 
-        System.out.println("WorkerAgent created");
+        System.out.println("WorkerAgent " + this._name + " created");
     }
 
     public void registerService() {

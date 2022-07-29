@@ -26,25 +26,32 @@ public class MainAgent extends Agent {
         var parser = new JSONParser();
         try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), StandardCharsets.UTF_8))) {
             var jsonInput = (JSONObject) parser.parse(reader);
-            var order = (JSONObject) jsonInput.get("order");
-            String name = (String) order.get("name");
-            double complexity = (double) order.get("complexity");
 
-            Object[] orderModel = {name, complexity}; // params args
-            createAgent(orderModel,
-                    name,
-                    "OrderAgent"
-            );
+            var orders = (JSONArray) jsonInput.get("orders");
+            for (Object o: orders) {
+                var order = (JSONObject) o;
+                String name = (String) order.get("name");
+                double complexity = (double) order.get("complexity");
 
-            var worker = (JSONObject) jsonInput.get("worker");
-            name = (String) worker.get("name");
-            double productivity = (double) worker.get("productivity");
+                Object[] orderModel = {name, complexity}; // params args
+                createAgent(orderModel,
+                        name,
+                        "OrderAgent"
+                );
+            }
 
-            Object[] workerModel = { name, productivity }; // params args
-            createAgent(workerModel,
-                    name,
-                    "WorkerAgent"
-            );
+            var workers = (JSONArray) jsonInput.get("workers");
+            for (Object w: workers) {
+                var worker = (JSONObject) w;
+                String name = (String) worker.get("name");
+                double complexity = (double) worker.get("productivity");
+
+                Object[] orderModel = {name, complexity}; // params args
+                createAgent(orderModel,
+                        name,
+                        "WorkerAgent"
+                );
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e) {
