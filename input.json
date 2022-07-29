@@ -1,31 +1,23 @@
 {
-  "orders": [
-    {
-      "name": "Order №00023052",
-      "complexity": 104.44
-    },
-    {
-      "name": "Order №00137263",
-      "complexity": 97.65
-    },
-    {
-      "name": "Order №00823721",
-      "complexity": 49.31
-    },
-    {
-      "name": "Order №09203723",
-      "complexity": 127.18
-    }
-  ],
+	"orders": [
+		{
+			"operationID": 3,
+			"complexity": 621
+		},
 
-  "workers": [
-    {
-      "name": "P. Parker",
-      "productivity": 34.12
-    },
-    {
-      "name": "M. Morales",
-      "productivity": 17.37
-    }
-  ]
+		{
+			"operationID": 3,
+			"complexity": 994
+		},
+
+		{"operationID": 4, "complexity": 599}, {"operationID": 2, "complexity": 919}, {"operationID": 3, "complexity": 864}, {"operationID": 0, "complexity": 980}, {"operationID": 3, "complexity": 849}, {"operationID": 3, "complexity": 765}, {"operationID": 4, "complexity": 742}, {"operationID": 1, "complexity": 313}, {"operationID": 1, "complexity": 498}, {"operationID": 2, "complexity": 968}, {"operationID": 3, "complexity": 670}, {"operationID": 0, "complexity": 341}, {"operationID": 2, "complexity": 912}, {"operationID": 4, "complexity": 685}, {"operationID": 4, "complexity": 391}, {"operationID": 1, "complexity": 662}, {"operationID": 4, "complexity": 757}, {"operationID": 3, "complexity": 505}, {"operationID": 0, "complexity": 357}, {"operationID": 2, "complexity": 663}, {"operationID": 2, "complexity": 416}, {"operationID": 0, "complexity": 607}, {"operationID": 4, "complexity": 900}, {"operationID": 2, "complexity": 588}, {"operationID": 1, "complexity": 574}, {"operationID": 2, "complexity": 689}, {"operationID": 4, "complexity": 356}, {"operationID": 0, "complexity": 995}, {"operationID": 4, "complexity": 283}, {"operationID": 4, "complexity": 914}, {"operationID": 4, "complexity": 671}, {"operationID": 4, "complexity": 177}, {"operationID": 3, "complexity": 859}, {"operationID": 1, "complexity": 793}, {"operationID": 2, "complexity": 798}, {"operationID": 1, "complexity": 768}, {"operationID": 0, "complexity": 851}, {"operationID": 4, "complexity": 999}, {"operationID": 2, "complexity": 849}, {"operationID": 3, "complexity": 279}, {"operationID": 1, "complexity": 998}, {"operationID": 1, "complexity": 602}, {"operationID": 2, "complexity": 142}, {"operationID": 1, "complexity": 716}, {"operationID": 2, "complexity": 616}, {"operationID": 1, "complexity": 293}, {"operationID": 4, "complexity": 955}, {"operationID": 3, "complexity": 638}],
+	
+	"workers": [
+		{
+			"name": "S.P. Crosby",
+			"operationID": 3,
+			"productivity": 87
+		},
+
+		{"name": "D. Haller", "operationID": 4, "productivity": 70}, {"name": "A. Ramsey", "operationID": 2, "productivity": 60}, {"name": "F. McDavid", "operationID": 0, "productivity": 93}, {"name": "W. Floyd", "operationID": 4, "productivity": 57}, {"name": "A. Claude", "operationID": 1, "productivity": 61}, {"name": "P. Weber", "operationID": 2, "productivity": 58}, {"name": "G. Kennedy", "operationID": 2, "productivity": 50}, {"name": "A. Pronger", "operationID": 3, "productivity": 74}, {"name": "J. Brickstone", "operationID": 0, "productivity": 68}, {"name": "B. Lee-Xiang", "operationID": 1, "productivity": 72}, {"name": "R. Alfredsson", "operationID": 1, "productivity": 88}],
 }
