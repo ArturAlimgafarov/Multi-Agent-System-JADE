@@ -64,7 +64,7 @@ public class MainAgent extends Agent {
                     };
 
                     createAgent(workerModel,
-                            "Worker(" + name + ")",
+                            "'" + name + "'",
                             "WorkerAgent"
                     );
                 }
@@ -86,7 +86,7 @@ public class MainAgent extends Agent {
                     };
 
                     createAgent(orderModel,
-                            "Order" + orderID,
+                            "'Order #" + orderID + "'",
                             "OrderAgent"
                     );
 
