@@ -12,6 +12,7 @@ import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static java.lang.Math.ceil;
@@ -20,7 +21,7 @@ public class WorkerAgent extends Agent {
     public long _operationID;
     public long _productivity;
     public long _busyTime;
-    public ArrayList<String> _orders;
+    public LinkedHashMap<String, Integer> _orders;
 
     @Override
     protected void setup() {
@@ -29,7 +30,7 @@ public class WorkerAgent extends Agent {
         _operationID = (long) args[0];
         _productivity = (long) args[1];
         _busyTime = 0;
-        _orders = new ArrayList<>();
+        _orders = new LinkedHashMap<>();
 
         registerService();
 
@@ -125,14 +126,20 @@ public class WorkerAgent extends Agent {
 
                             System.out.println(getLocalName() + " ACCEPTED " + orderName);
 
-                            _orders.add(orderName);
+                            _orders.put(orderName, (int) duration);
 
                             _busyTime += duration;
                         }
                     }
 
+                    // message from Main about orders are over
                     case ACLMessage.CANCEL -> {
-                        System.out.println(getLocalName() + ": " + _orders);
+                        long sum = 0;
+                        for (var key: _orders.keySet()) {
+                            sum += _orders.get(key);
+                        }
+
+                        System.out.println(getLocalName() + ": " + _orders + " (" + sum + ").");
 
                         try {
                             getContainerController().getAgent(getLocalName()).kill();
