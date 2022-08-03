@@ -193,6 +193,6 @@ public class OrderAgent extends Agent {
 
     @Override
     protected void takeDown() {
-        System.out.println(getAID().getLocalName() + " destroyed\n");
+        System.out.println(getAID().getLocalName() + " destroyed.");
     }
 }

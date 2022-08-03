@@ -112,14 +112,14 @@ public class WorkerAgent extends Agent {
 
                             myAgent.send(responseToOrder);
 
-                            System.out.println(" --- REFUSED: <" + getLocalName() + " | " + orderName + ">");
+                            System.out.println(getLocalName() + " REFUSED " + orderName);
                         } else {
                             responseToOrder = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                             responseToOrder.addReceiver(msg.getSender());
 
                             myAgent.send(responseToOrder);
 
-                            System.out.println(" +++ ACCEPTED: <" + getLocalName() + " | " + orderName + ">");
+                            System.out.println(getLocalName() + " ACCEPTED " + orderName);
 
                             Map<String, Double> data = new HashMap<>();
                             data.put("duration", (double) duration);
@@ -136,6 +136,6 @@ public class WorkerAgent extends Agent {
 
     @Override
     protected void takeDown() {
-        System.out.println(getAID().getLocalName() + " destroyed\n");
+        System.out.println(getAID().getLocalName() + " destroyed.");
     }
 }

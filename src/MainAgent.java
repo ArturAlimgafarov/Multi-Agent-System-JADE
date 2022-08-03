@@ -147,10 +147,10 @@ public class MainAgent extends Agent {
                     // message from Order
                     case ACLMessage.INFORM -> {
                         _ordersCounter++;
-                        System.out.println(_ordersCounter + " / " + _ordersCount + " (" + msg.getSender().getLocalName() + ")\n");
+//                        System.out.println(_ordersCounter + " / " + _ordersCount + " (" + msg.getSender().getLocalName() + ")\n");
 
                         if (_ordersCounter == _ordersCount) {
-                            System.out.println("Orders are over\n");
+                            System.out.println("*** Orders are over. ***");
                         }
                     }
                 }
