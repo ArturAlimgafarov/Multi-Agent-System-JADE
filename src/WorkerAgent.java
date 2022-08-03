@@ -1,6 +1,5 @@
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -10,9 +9,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.lang.Math.ceil;
+
 public class WorkerAgent extends Agent {
     public long _operationID;
     public long _productivity;
+    public long _busyTime;
 
     @Override
     protected void setup() {
@@ -20,6 +25,7 @@ public class WorkerAgent extends Agent {
 
         _operationID = (long) args[0];
         _productivity = (long) args[1];
+        _busyTime = 0;
 
         registerService();
 
@@ -54,20 +60,75 @@ public class WorkerAgent extends Agent {
         public void action() {
             ACLMessage msg = myAgent.receive();
             if (msg != null) {
-                if (msg.getPerformative() == ACLMessage.REQUEST) {
-                    var parser = new JSONParser();
+                switch (msg.getPerformative()) {
+                    case ACLMessage.REQUEST -> {
+                        var parser = new JSONParser();
+                        JSONObject jsonObject = null;
 
-                    JSONObject jsonObject = null;
-                    try {
-                        jsonObject = (JSONObject) parser.parse(msg.getContent());
-                    } catch (ParseException e) {
-                        e.printStackTrace();
+                        try {
+                            jsonObject = (JSONObject) parser.parse(msg.getContent());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        long orderOperationID = (long) jsonObject.get("operationID");
+                        long orderComplexity = (long) jsonObject.get("complexity");
+
+                        if (orderOperationID == _operationID) {
+                            ACLMessage messageToOrder = new ACLMessage(ACLMessage.PROPOSE);
+
+                            long duration = (long) ceil((double) orderComplexity / (double) _productivity);
+
+                            JSONObject jsonToOrder = new JSONObject();
+                            jsonToOrder.put("name", getLocalName());
+                            jsonToOrder.put("duration", duration);
+                            jsonToOrder.put("busy", _busyTime);
+
+                            messageToOrder.setContent(jsonToOrder.toJSONString());
+                            messageToOrder.addReceiver(msg.getSender());
+
+                            myAgent.send(messageToOrder);
+                        }
                     }
 
-                    long orderOperationID = (long) jsonObject.get("operationID");
-                    long orderComplexity = (long) jsonObject.get("complexity");
+                    case ACLMessage.AGREE -> {
+                        var parser1 = new JSONParser();
+                        JSONObject jsonFromOrder = null;
 
-                    System.out.println(getLocalName() + " receive " + msg.getSender().getLocalName() + " (" + orderOperationID + "; " + orderComplexity + ")");
+                        try {
+                            jsonFromOrder = (JSONObject) parser1.parse(msg.getContent());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        String orderName = msg.getSender().getLocalName();
+                        long busy = (long) jsonFromOrder.get("busy");
+                        long duration = (long) jsonFromOrder.get("duration");
+                        ACLMessage responseToOrder;
+                        if (_busyTime > busy) {
+                            // this worker is already busy
+                            responseToOrder = new ACLMessage(ACLMessage.REFUSE);
+                            responseToOrder.addReceiver(msg.getSender());
+
+                            myAgent.send(responseToOrder);
+
+                            System.out.println(" --- REFUSED: <" + getLocalName() + " | " + orderName + ">");
+                        } else {
+                            responseToOrder = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+                            responseToOrder.addReceiver(msg.getSender());
+
+                            myAgent.send(responseToOrder);
+
+                            System.out.println(" +++ ACCEPTED: <" + getLocalName() + " | " + orderName + ">");
+
+                            Map<String, Double> data = new HashMap<>();
+                            data.put("duration", (double) duration);
+
+//                            _orders.put(orderName, data);
+
+                            _busyTime += duration;
+                        }
+                    }
                 }
             }
         }
@@ -75,5 +136,6 @@ public class WorkerAgent extends Agent {
 
     @Override
     protected void takeDown() {
+        System.out.println(getAID().getLocalName() + " destroyed\n");
     }
 }

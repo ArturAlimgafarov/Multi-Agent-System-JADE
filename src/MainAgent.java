@@ -1,8 +1,10 @@
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 import org.json.simple.JSONArray;
@@ -16,9 +18,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainAgent extends Agent {
+    public long _workersCount;
+    public long _ordersCount;
+    public long _ordersCounter;
+
     @Override
     protected void setup() {
         registerService();
+
+        addBehaviour(new WaitingFinish());
+
+        _ordersCounter = 0;
 
         System.out.println(getLocalName() + " launched.");
 
@@ -28,38 +38,62 @@ public class MainAgent extends Agent {
         try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), StandardCharsets.UTF_8))) {
             var jsonInput = (JSONObject) parser.parse(reader);
 
-            int i = 1;
-            var orders = (JSONArray) jsonInput.get("orders");
-            for (Object o: orders) {
-                var order = (JSONObject) o;
-                String orderName = "`Order №" + i + "`";
-                long orderOperationID = (long) order.get("operationID");
-                long complexity = (long) order.get("complexity");
-
-                Object[] orderModel = {orderOperationID, complexity}; // params args
-                createAgent(orderModel,
-                        orderName,
-                        "OrderAgent"
-                );
-
-                i++;
-            }
-
+            // workers
             var workers = (JSONArray) jsonInput.get("workers");
-            for (Object w: workers) {
-                var worker = (JSONObject) w;
-                String workerName = "`" + worker.get("name") + "`";
-                long workerOperationID = (long) worker.get("operationID");
-                long productivity = (long) worker.get("productivity");
+            _workersCount = workers.size();
+            Map<Integer, Integer> amount = new HashMap<>();
 
-                Object[] workerModel = {workerOperationID, productivity}; // params args
-                createAgent(workerModel,
-                        workerName,
-                        "WorkerAgent"
-                );
+            for (Object o : workers) {
+                if (o instanceof JSONObject worker) {
+                    String name = (String) worker.get("name");
+                    long operationID = (long) worker.get("operationID");
+                    long productivity = (long) worker.get("productivity");
+
+                    int id = (int) operationID;
+
+                    if (amount.containsKey(id)) {
+                        int k = amount.get(id);
+                        amount.put(id, k + 1);
+                    }
+                    else {
+                        amount.put(id, 1);
+                    }
+
+                    Object[] workerModel = {
+                            operationID, productivity
+                    };
+
+                    createAgent(workerModel,
+                            "Worker(" + name + ")",
+                            "WorkerAgent"
+                    );
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            // orders
+            var orders = (JSONArray) jsonInput.get("orders");
+            _ordersCount = orders.size();
+
+            long orderID = 0;
+            for (Object o : orders) {
+                if (o instanceof JSONObject order) {
+                    long operationID = (long) order.get("operationID");
+                    long complexity = (long) order.get("complexity");
+                    long countWorkers = amount.get((int) operationID);
+
+                    Object[] orderModel = {
+                            operationID, complexity, countWorkers, getAID()
+                    };
+
+                    createAgent(orderModel,
+                            "Order" + orderID,
+                            "OrderAgent"
+                    );
+
+                    orderID++;
+                }
+            }
+        } catch (IOException ignored) {
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -100,6 +134,26 @@ public class MainAgent extends Agent {
                 ac.start();
             } catch (StaleProxyException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    public class WaitingFinish extends CyclicBehaviour {
+        @Override
+        public void action() {
+            ACLMessage msg = myAgent.receive();
+            if (msg != null) {
+                switch (msg.getPerformative()) {
+                    // message from Order
+                    case ACLMessage.INFORM -> {
+                        _ordersCounter++;
+                        System.out.println(_ordersCounter + " / " + _ordersCount + " (" + msg.getSender().getLocalName() + ")\n");
+
+                        if (_ordersCounter == _ordersCount) {
+                            System.out.println("Orders are over\n");
+                        }
+                    }
+                }
             }
         }
     }
