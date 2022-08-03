@@ -151,6 +151,28 @@ public class MainAgent extends Agent {
 
                         if (_ordersCounter == _ordersCount) {
                             System.out.println("*** Orders are over. ***");
+
+                            ACLMessage messageToWorkers = new ACLMessage(ACLMessage.CANCEL);
+                            DFAgentDescription tmpWorkers = new DFAgentDescription();
+                            ServiceDescription sdWorkers = new ServiceDescription();
+                            sdWorkers.setType("WorkerAgent");
+                            tmpWorkers.addServices(sdWorkers);
+
+                            try {
+                                DFAgentDescription[] res = null;
+
+                                while (res == null || res != null && res.length < 1) {
+                                    res = DFService.search(myAgent, tmpWorkers);
+                                }
+
+                                for (var worker: res) {
+                                    messageToWorkers.addReceiver(worker.getName());
+                                }
+
+                                myAgent.send(messageToWorkers);
+                            } catch (FIPAException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }

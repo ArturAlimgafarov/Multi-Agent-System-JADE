@@ -5,10 +5,12 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+import jade.wrapper.ControllerException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +20,7 @@ public class WorkerAgent extends Agent {
     public long _operationID;
     public long _productivity;
     public long _busyTime;
+    public ArrayList<String> _orders;
 
     @Override
     protected void setup() {
@@ -26,6 +29,7 @@ public class WorkerAgent extends Agent {
         _operationID = (long) args[0];
         _productivity = (long) args[1];
         _busyTime = 0;
+        _orders = new ArrayList<>();
 
         registerService();
 
@@ -121,12 +125,19 @@ public class WorkerAgent extends Agent {
 
                             System.out.println(getLocalName() + " ACCEPTED " + orderName);
 
-                            Map<String, Double> data = new HashMap<>();
-                            data.put("duration", (double) duration);
-
-//                            _orders.put(orderName, data);
+                            _orders.add(orderName);
 
                             _busyTime += duration;
+                        }
+                    }
+
+                    case ACLMessage.CANCEL -> {
+                        System.out.println(getLocalName() + ": " + _orders);
+
+                        try {
+                            getContainerController().getAgent(getLocalName()).kill();
+                        } catch (ControllerException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
