@@ -6,6 +6,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentController;
+import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,13 +15,18 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MainAgent extends Agent {
     public long _workersCount;
+    public long _workersCounter;
     public long _ordersCount;
     public long _ordersCounter;
+
+    public Map<String, LinkedHashMap<String, Integer>> _scheduler;
 
     @Override
     protected void setup() {
@@ -29,6 +35,9 @@ public class MainAgent extends Agent {
         addBehaviour(new WaitingFinish());
 
         _ordersCounter = 0;
+        _workersCounter = 0;
+
+        _scheduler = new HashMap<>();
 
         System.out.println(getLocalName() + " launched.");
 
@@ -151,7 +160,7 @@ public class MainAgent extends Agent {
                         //System.out.println(_ordersCounter + " / " + _ordersCount + " (" + msg.getSender().getLocalName() + ")\n");
 
                         if (_ordersCounter == _ordersCount) {
-                            System.out.println("*** Orders are over. ***");
+                            System.out.println("\n*** Orders are over. ***\n");
 
                             ACLMessage messageToWorkers = new ACLMessage(ACLMessage.CANCEL);
                             DFAgentDescription tmpWorkers = new DFAgentDescription();
@@ -176,6 +185,49 @@ public class MainAgent extends Agent {
                             }
                         }
                     }
+
+                    // message from Worker
+                    case ACLMessage.PROPOSE -> {
+                        _workersCounter++;
+
+                        // read Worker's schedule data
+                        var parser = new JSONParser();
+                        JSONObject jsonFromWorker = null;
+
+                        try {
+                            jsonFromWorker = (JSONObject) parser.parse(msg.getContent());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        String workerName = msg.getSender().getLocalName();
+                        LinkedHashMap<String, Integer> orders = new LinkedHashMap<>();
+                        for (Object key: jsonFromWorker.keySet()) {
+                            long dur = (long) jsonFromWorker.get(key);
+                            orders.put((String) key, (int) dur);
+                        }
+
+                        _scheduler.put(workerName, orders);
+
+                        if (_workersCounter == _workersCount) {
+                            System.out.println("\n*** All Workers reported. ***\n");
+
+                            int i = 1;
+                            for (var keyWorker: _scheduler.keySet()) {
+                                System.out.println((i++) + ". " + keyWorker + ":");
+                                var schedule = _scheduler.get(keyWorker);
+                                for (var keyOrder: schedule.keySet()) {
+                                    System.out.println("\t" + keyOrder + " = " + schedule.get(keyOrder));
+                                }
+                            }
+
+                            try {
+                                getContainerController().getAgent(getLocalName()).kill();
+                            } catch (ControllerException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -183,7 +235,7 @@ public class MainAgent extends Agent {
 
     @Override
     protected void takeDown() {
-        System.out.println("Program completed.");
+        System.out.println("\n*** Program completed. ***\n");
         System.out.println(getAID().getLocalName() + " destroyed.");
     }
 }

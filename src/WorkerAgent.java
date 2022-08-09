@@ -10,10 +10,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static java.lang.Math.ceil;
 
@@ -134,12 +131,18 @@ public class WorkerAgent extends Agent {
 
                     // message from Main about orders are over
                     case ACLMessage.CANCEL -> {
-                        long sum = 0;
+                        ACLMessage noticeToMain = new ACLMessage(ACLMessage.PROPOSE);
+
+                        // schedule data
+                        JSONObject jsonToMain = new JSONObject();
                         for (var key: _orders.keySet()) {
-                            sum += _orders.get(key);
+                            jsonToMain.put(key, _orders.get(key));
                         }
 
-                        System.out.println(getLocalName() + ": " + _orders + " (" + sum + ").");
+                        noticeToMain.setContent(jsonToMain.toJSONString());
+                        noticeToMain.addReceiver(msg.getSender());
+
+                        myAgent.send(noticeToMain);
 
                         try {
                             getContainerController().getAgent(getLocalName()).kill();
