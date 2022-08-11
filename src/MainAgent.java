@@ -8,6 +8,8 @@ import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentController;
 import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
+
+import org.apache.poi.ss.usermodel.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -15,10 +17,15 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+
 
 public class MainAgent extends Agent {
     public long _workersCount;
@@ -212,17 +219,58 @@ public class MainAgent extends Agent {
                         if (_workersCounter == _workersCount) {
                             System.out.println("\n*** All Workers reported. ***\n");
 
+                            // logging schedule
                             int i = 1;
+                            int maxWorkTime = 0;
                             for (var keyWorker: _scheduler.keySet()) {
                                 System.out.println((i++) + ". " + keyWorker + ":");
+                                int workTimeCounter = 0;
                                 var schedule = _scheduler.get(keyWorker);
-                                for (var keyOrder: schedule.keySet()) {
-                                    System.out.println("\t" + keyOrder + " = " + schedule.get(keyOrder));
+                                for (var keyOrder : schedule.keySet()) {
+                                    int dur = schedule.get(keyOrder);
+                                    System.out.println("\t" + keyOrder + " = " + dur);
+                                    workTimeCounter += dur;
+                                }
+
+                                if (workTimeCounter > maxWorkTime) {
+                                    maxWorkTime = workTimeCounter;
                                 }
                             }
 
+                            // output schedule to file
+                            Workbook workbook = new HSSFWorkbook();
+                            Sheet sheet = workbook.createSheet("schedule");
+
+                            i = 1;
+                            for (var keyWorker: _scheduler.keySet()) {
+                                Row row = sheet.createRow(i++);
+                                Cell cell = row.createCell(0, CellType.STRING);
+                                cell.setCellValue(keyWorker);
+                                var schedule = _scheduler.get(keyWorker);
+                                for (var keyOrder: schedule.keySet()) {
+                                    int count = schedule.get(keyOrder);
+                                    for (int j = 0; j < count; j++) {
+                                        cell = row.createCell(j + 1, CellType.STRING);
+                                        cell.setCellValue(keyOrder);
+                                    }
+                                }
+                            }
+
+                            File file = new File("C:/Users/ARTURIO/Desktop/output.xls");
+                            FileOutputStream outFile = null;
+
                             try {
-                                getContainerController().getAgent(getLocalName()).kill();
+                                outFile = new FileOutputStream(file);
+                                workbook.write(outFile);
+                                outFile.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+
+                            // deleting agents container
+                            try {
+                                getContainerController().kill();
                             } catch (ControllerException e) {
                                 e.printStackTrace();
                             }
